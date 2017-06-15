@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!-- http://docs.nuget.org/docs/reference/nuspec-reference -->
+<package >
+  <metadata>
+    <id>RedGate.ULibs.ShellEscape.Sources</id>
+    <version>$version$</version>
+    <authors>red-gate</authors>
+    <owners>red-gate</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Lightweight JSON serializer. This is a source-only package that provides a single JsonSerializer class, used to convert .NET objects into JSON strings.</description>
+    <releaseNotes><![CDATA[$releaseNotes$]]></releaseNotes>
+    <copyright>Copyright 2016, 2017 Red Gate Software Ltd</copyright>
+    <projectUrl>https://github.com/red-gate/MicroLibraries</projectUrl>
+  </metadata>
+  <files>
+    <file src="*.pp" target="content\App_Packages\RedGate.ULibs.ShellEscape.$version$"/>
+  </files>
+</package>

@@ -17,7 +17,7 @@ $CopyrightHeader = @"
 Copyright 2016-$(Get-Date -Format yyyy) Red Gate Software Ltd (https://github.com/red-gate/MicroLibraries)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
-License. You may obtain a copy of the License at
+License and this notice. You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 
@@ -31,7 +31,6 @@ satisfying the requirements of section 4a of the License. In practice, this mean
 library in binary releases of your own software without having to also include this notice, a copy of the Licence, or
 any other copyright attribution.
 */
-
 "@
 
 
@@ -149,6 +148,7 @@ task Package {
         
         $NuSpecPath = "$ProjectDir\$ProjectName.nuspec" | Resolve-Path
         $ReleaseNotesPath = "$ProjectDir\RELEASENOTES.md" | Resolve-Path
+        $ReadmePath = "$ProjectDir\README.md" | Resolve-Path
         
         # Locate source files to be included in the package, and generate their corresponding .pp files.
         Get-ChildItem $ProjectDir -Filter *.cs | ForEach-Object {
@@ -158,7 +158,7 @@ task Package {
             if ($OriginalContents -ne $ModifiedContents) {
                 Write-Host "  Including file $InputPath"
                 
-                $ModifiedContents = "$CopyrightHeader$ModifiedContents"
+                $ModifiedContents = "$CopyrightHeader`r`n`r`n$ModifiedContents"
                 
                 $OutputPath = "$InputPath.pp"
                 Write-Host "    Rewriting to $OutputPath"
@@ -166,11 +166,14 @@ task Package {
             }
         }
         
-        # Establish release notes and package version number
+        # Establish release notes and package version number from the RELEASENOTES.md file.
         $Notes = Read-ReleaseNotes $ReleaseNotesPath -ThreePartVersion
         $ReleaseNotes = $Notes.Content
         $Version = $Notes.Version
         Write-Host "Version from release notes: $Version"
+        
+        # Establish the description from the README.md file.
+        $Description = [System.IO.File]::ReadAllText($ReadmePath, [System.Text.Encoding]::UTF8).Trim()
 
         # Establish NuGet package version.
         $BranchName = Get-BranchName
@@ -184,7 +187,7 @@ task Package {
             "$NuSpecPath",
             '-Version', $NuGetPackageVersion,
             '-OutputDirectory', $DistDir,
-            '-Properties', "releaseNotes=$ReleaseNotes"
+            '-Properties', "releaseNotes=$ReleaseNotes;description=$Description"
         )
         Write-Host "$NuGetPath $Parameters"
         exec {

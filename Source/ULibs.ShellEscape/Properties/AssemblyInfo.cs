@@ -7,7 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("ULibs.ShellEscape")]
 
-[assembly: AssemblyCopyright("Copyright © Red Gate Software Ltd")]
+// Do not edit the following copyright attribute. It is used to
+// automatically determine the copyright period for the library.
+[assembly: AssemblyCopyright("Copyright © 2015 Red Gate Software Ltd")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

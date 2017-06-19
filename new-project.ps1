@@ -79,15 +79,22 @@
     
       # Replace the project name in the file.
       if ($NameRegex.IsMatch($Contents)) {
-        Write-Host "    Substituted new project name in file contents"
+        Write-Host '    Substituting new project name in file contents'
         $Contents = $NameRegex.Replace($Contents, $NewProjectName)
       }
       
       # Special treatment for the project file, to assign the new project GUID.
       if ([System.IO.Path]::GetExtension($OutputFileRelativePath) -eq '.csproj') {
-        Write-Host "    Substituted new project guid in project file contents"
+        Write-Host '    Substituting new project guid in project file contents'
         $ProjectGuidRegex = [regex] '(?<=\<ProjectGuid\>).+?(?=\</ProjectGuid\>)'
         $Contents = $ProjectGuidRegex.Replace($Contents, $NewProjectGuid)
+      }
+      
+      # Special treatment for the AssemblyInfo.cs file, to assign the copyright year.
+      if ([System.IO.Path]::GetFileName($OutputFileRelativePath) -eq 'AssemblyInfo.cs') {
+        Write-Host '    Substituting current year in assembly copyright attribute'
+        $CopyrightRegex = [regex] '(?<=AssemblyCopyright\("Copyright .*?)[0-9]{4}'
+        $Contents = $CopyrightRegex.Replace($Contents, (Get-Date -Format yyy))
       }
     
       # Write the contents to the output file.

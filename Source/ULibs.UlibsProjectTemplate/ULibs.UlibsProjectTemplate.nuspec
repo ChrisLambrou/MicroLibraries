@@ -9,7 +9,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description><![CDATA[$description$]]></description>
     <releaseNotes><![CDATA[$releaseNotes$]]></releaseNotes>
-    <copyright>Copyright 2016, 2017 Red Gate Software Ltd</copyright>
+    <copyright>Copyright $copyrightYear$ Red Gate Software Ltd</copyright>
     <projectUrl>https://github.com/red-gate/MicroLibraries</projectUrl>
   </metadata>
   <files>

@@ -1,5 +1,5 @@
 # This file cannot be invoked directly; it simply contains a bunch of Invoke-Build tasks. To use it, invoke
-# _init.ps1 which declares three global functions (build, clean, rebuild), then invoke one of those functions.
+# _init.ps1 which declares four global functions (build, clean, rebuild, package), then invoke one of those functions.
 
 [CmdletBinding()]
 param([string]$Configuration = 'Release')

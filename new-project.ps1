@@ -1,6 +1,11 @@
 #requires -Version 3.0
 
-# Run code in a script block to avoid polluting the global namespace
+# This script is used to generate a new micro-library project. You only need to provide a
+# name for the new library, and optionally specify which template project will be copied
+# (currently there's only one template, and it's chosen by default), and the script will
+# then generate everything you need to build your new micro-library.
+
+# Run code in a script block to avoid polluting the global namespace.
 & {
   # Helper functions.
   function Write-Info ($Message) { Write-Host $Message -ForegroundColor Yellow }
@@ -9,6 +14,7 @@
   
   function Test-HasNoValue ($String) { !(Test-HasValue $String) }
   
+  # Tidies up a project name, adding a `ULibs.` prefix if absent, and capitalising the first letter.
   function Tidy-ProjectName ($Name) {
     if ($Name.Split('.')[0] -eq 'ULibs') { $Name = $Name.Substring(6) }
     $Name = "$($Name.Substring(0, 1).ToUpperInvariant())$($Name.Substring(1))"
@@ -40,7 +46,9 @@
   Write-Info 'Creating new project folder'
   $Null = mkdir $NewProjectDir
   
-  # Create a regex used for replacing the old name with the new one.
+  # Create a regex used for replacing the old name with the new one. We use a regex rather than
+  # a simple `string.Replace($SourceProjectName, $NewProjectName)` to accomodate any accidental
+  # case variations in any of the source project files.
   $NameRegex = [regex] "(?in)(?<=(^|\W))$($SourceProjectName.Replace('.', '\.'))(?=($|\W))"
   
   # The GUID for the new project.
@@ -74,10 +82,11 @@
     # Handle copying a file.
     else {
       Write-Host "    Creating file $OutputFilePath"
+
       # Read the contents of the source file.
       $Contents = [System.IO.File]::ReadAllText($SourceFilePath, [System.Text.Encoding]::UTF8)
     
-      # Replace the project name in the file.
+      # Replace the source project name with the new project name wherever it occurs in the file.
       if ($NameRegex.IsMatch($Contents)) {
         Write-Host '    Substituting new project name in file contents'
         $Contents = $NameRegex.Replace($Contents, $NewProjectName)
@@ -117,7 +126,7 @@
   
   $Index = $Lines.IndexOf("`tEndGlobalSection")
   $Index = $Lines.IndexOf("`tEndGlobalSection", $Index + 1)
-    $NewLines = [Collections.Generic.List[String]] @(
+  $NewLines = [Collections.Generic.List[String]] @(
     "`t`t$NewProjectGuid.Debug|Any CPU.ActiveCfg = Debug|Any CPU",
     "`t`t$NewProjectGuid.Debug|Any CPU.Build.0 = Debug|Any CPU",
     "`t`t$NewProjectGuid.Release|Any CPU.ActiveCfg = Release|Any CPU",

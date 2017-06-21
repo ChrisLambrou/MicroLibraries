@@ -12,7 +12,7 @@ These micro-libraries are intended to provide small focused pieces of functional
 
 **TL;DR -- Licensed under the Apache License, Version 2.0. Additionally, you're free to release it in binary form as part of your own software without the need to include the license text, the license notice or any copyright attribution notice.**
 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this software except in compliance with the License. You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this software except in compliance with the License and this notice. You may obtain a copy of the License at
 
 http://www.apache.org/licenses/LICENSE-2.0
 

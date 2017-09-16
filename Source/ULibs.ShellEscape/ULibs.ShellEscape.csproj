@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="README.md" />
     <None Include="RELEASENOTES.md" />
     <None Include="ULibs.ShellEscape.nuspec" />
   </ItemGroup>

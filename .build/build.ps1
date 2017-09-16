@@ -117,9 +117,6 @@ task Test  Compile, {
 task Package {
     Write-Info 'Generating NuGet packages'
 
-    # Create the output folder.
-    $Null = mkdir $DistDir -Force
-
     # Loop through each project.
     Get-ChildItem $SourceDir -Directory -Filter 'ULibs.*' | ForEach-Object {
         $ProjectDir = $_.FullName
@@ -189,13 +186,17 @@ any other copyright attribution.
         $IsDefaultBranch = $BranchName -eq 'master'
         $NuGetPackageVersion = New-SemanticNuGetPackageVersion -Version $Version -BranchName $BranchName -IsDefaultBranch $IsDefaultBranch
         Write-Host "NuGet package version = $NuGetPackageVersion"
+
+        # Establish the output folder.
+        $OutputDir = if (Test-NugetPackage -Name ProjectName -Version $Version) { "$DistDir\Not publishable" } else { "$DistDir\Publishable" }
+        $Null = mkdir $OutputDir -Force
         
         # Run NuGet pack.
         $Parameters = @(
             'pack',
             "$NuSpecPath",
             '-Version', $NuGetPackageVersion,
-            '-OutputDirectory', $DistDir,
+            '-OutputDirectory', $OutputDir,
             '-Properties', "copyrightYear=$CopyrightYear;releaseNotes=$ReleaseNotes;description=$Description"
         )
         Write-Host "$NuGetPath $Parameters"

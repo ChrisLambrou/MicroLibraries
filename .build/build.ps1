@@ -178,8 +178,10 @@ any other copyright attribution.
         $Version = $Notes.Version
         Write-Host "Version from release notes: $Version"
         
-        # Establish the description from the README.md file.
+        # Establish the summary and description from the README.md file.
         $Description = [System.IO.File]::ReadAllText($ReadmePath, [System.Text.Encoding]::UTF8).Trim()
+        $Regex = [regex] '\.\s'
+        $Summary = if ($Description -match $Regex) { ($Description -split $Regex)[0] + '.' } else { $Description }
 
         # Establish NuGet package version.
         $BranchName = Get-BranchName
@@ -197,7 +199,7 @@ any other copyright attribution.
             "$NuSpecPath",
             '-Version', $NuGetPackageVersion,
             '-OutputDirectory', $OutputDir,
-            '-Properties', "copyrightYear=$CopyrightYear;releaseNotes=$ReleaseNotes;description=$Description"
+            '-Properties', "copyrightYear=$CopyrightYear;releaseNotes=$ReleaseNotes;summary=$Summary;description=$Description"
         )
         Write-Host "$NuGetPath $Parameters"
         exec {

@@ -122,7 +122,8 @@ task Package {
         $ProjectDir = $_.FullName
         $ProjectName = $_.Name
         Write-Host "Project folder found: $ProjectDir"
-        
+
+        $PackageId = "RedGate.$ProjectName.Sources"
         $NuSpecPath = "$ProjectDir\$ProjectName.nuspec" | Resolve-Path
         $ReleaseNotesPath = "$ProjectDir\RELEASENOTES.md" | Resolve-Path
         $ReadmePath = "$ProjectDir\README.md" | Resolve-Path
@@ -190,7 +191,11 @@ any other copyright attribution.
         Write-Host "NuGet package version = $NuGetPackageVersion"
 
         # Establish the output folder.
-        $OutputDir = if (Test-NugetPackage -Name ProjectName -Version $Version) { "$DistDir\Not publishable" } else { "$DistDir\Publishable" }
+        $OutputDir = if ($PackageId -eq 'RedGate.ULibs.UlibsProjectTemplate.Sources' -or (Test-NugetPackage -Name $PackageId -Version $Version)) {
+            "$DistDir\Not publishable"
+        } else {
+            "$DistDir\Publishable"
+        }
         $Null = mkdir $OutputDir -Force
         
         # Run NuGet pack.

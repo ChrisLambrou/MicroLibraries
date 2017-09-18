@@ -204,6 +204,7 @@ any other copyright attribution.
             "$NuSpecPath",
             '-Version', $NuGetPackageVersion,
             '-OutputDirectory', $OutputDir,
+            '-ForceEnglishOutput',
             '-Properties', "copyrightYear=$CopyrightYear;releaseNotes=$ReleaseNotes;summary=$Summary;description=$Description"
         )
         Write-Host "$NuGetPath $Parameters"
@@ -213,6 +214,44 @@ any other copyright attribution.
 
         # Delete the temporary .pp files.
         Get-ChildItem $ProjectDir -Filter *.pp | Remove-Item
+    }
+}
+
+
+
+# Publish task, publishes the NuGet package for each micro-library that is eligible for publication.
+task Publish {
+    Write-Info 'Publishing eligible NuGet packages'
+    
+    if (-not $env:NugetFeedUrl -or -not $env:NugetFeedApiKey) {
+        Write-Warning 'Skipping publication - missing NugetFeedUrl and NugetFeedApiKey environment variables'
+    } else {
+        if (-not (Test-Path $DistDir)) {
+            throw "The $DistDir folder has not yet been created. Try running the Package task first."
+        } else {
+            $PackagesDir = "$DistDir\Publishable"
+            $PublishablePackages = if (Test-Path $PackagesDir) { Get-ChildItem $PackagesDir -Filter *.nupkg }
+            Write-Host $PublishablePackages
+            if (-not $PublishablePackages) {
+                Write-Warning "Skipping publication - no eligible NuGet packages found in $PackagesDir"
+            } else {
+                $PublishablePackages | ForEach-Object {
+                    # Run NuGet push.
+                    $Parameters = @(
+                        'push',
+                        $_.FullName,
+                        '-Source', $env:NugetFeedUrl,
+                        '-ApiKey', $env:NugetFeedApiKey,
+                        '-ForceEnglishOutput',
+                        '-NonInteractive'
+                    )
+                    Write-Host "$NuGetPath $Parameters"
+                    exec {
+                        & $NuGetPath $Parameters
+                    }
+                }
+            }
+        }
     }
 }
 

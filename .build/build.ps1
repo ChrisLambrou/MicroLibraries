@@ -23,20 +23,6 @@ function Write-Info {
 }
 
 
-# Environment-specific configuration should happen here (and only here!)
-task Init {
-    Write-Info 'Establishing build properties'
-
-    $script:IsAutomatedBuild = $env:BRANCH_NAME -and $env:BUILD_NUMBER
-    Write-Host "Is automated build = $IsAutomatedBuild"
-    
-    $script:BranchName = Get-BranchName
-    Write-Host "Branch name = $BranchName"
-    
-    $script:IsDefaultBranch = $BranchName -eq 'master'
-    Write-Host "Is default branch = $IsDefaultBranch"
-}
-
 function Get-BranchName {
     # If the branch name is specified via an environment variable (i.e. on TeamCity), use it.
     if ($env:BRANCH_NAME) {

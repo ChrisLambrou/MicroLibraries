@@ -60,11 +60,6 @@ function global:Rebuild
     Build -Task Rebuild
 }
 
-function global:Package
-{
-    Build -Task Package
-}
-
 function global:Publish
 {
     Build -Task Publish
@@ -74,5 +69,4 @@ Write-Host 'The following commands are now available:' -ForegroundColor Magenta
 Write-Host "    Build [-Task <task-list>]" -ForegroundColor Green
 Write-Host "    Clean" -ForegroundColor Green
 Write-Host "    Rebuild" -ForegroundColor Green
-Write-Host "    Package" -ForegroundColor Green
 Write-Host "    Publish" -ForegroundColor Green

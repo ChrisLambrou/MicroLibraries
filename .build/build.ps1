@@ -213,7 +213,7 @@ task Publish {
         Write-Warning 'Skipping publication - missing NugetFeedUrl and NugetFeedApiKey environment variables'
     } else {
         if (-not (Test-Path $DistDir)) {
-            throw "The $DistDir folder has not yet been created. Try running the Package task first."
+            throw "The $DistDir folder has not yet been created. Try running the Build or Package tasks first."
         } else {
             $PackagesDir = "$DistDir\Publishable"
             $PublishablePackages = if (Test-Path $PackagesDir) { Get-ChildItem $PackagesDir -Filter *.nupkg }

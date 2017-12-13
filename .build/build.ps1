@@ -115,16 +115,35 @@ task Package {
         $ReadmePath = "$ProjectDir\README.md" | Resolve-Path
         $AssemblyInfoPath = "$ProjectDir\Properties\AssemblyInfo.cs" | Resolve-Path
 
-        # Establish the copyright header.
+        # Establish release notes and package version number from the RELEASENOTES.md file.
+        $Notes = Read-ReleaseNotes $ReleaseNotesPath -ThreePartVersion
+        $ReleaseNotes = $Notes.Content
+        $Version = $Notes.Version
+        Write-Host "Version from release notes: $Version"
+
+        # Establish the summary and description from the README.md file.
+        $Description = [System.IO.File]::ReadAllText($ReadmePath, [System.Text.Encoding]::UTF8).Trim()
+        $Regex = [regex] '\.\s'
+        $Summary = if ($Description -match $Regex) { ($Description -split $Regex)[0] + '.' } else { $Description }
+
+        # Establish NuGet package version.
+        $BranchName = Get-BranchName
+        $IsDefaultBranch = $BranchName -eq 'master'
+        $NuGetPackageVersion = New-SemanticNuGetPackageVersion -Version $Version -BranchName $BranchName -IsDefaultBranch $IsDefaultBranch
+        Write-Host "NuGet package version = $NuGetPackageVersion"
+
+        # Establish the file header.
         $AssemblyInfo = [System.IO.File]::ReadAllText($AssemblyInfoPath, [System.Text.Encoding]::UTF8)
         $CopyrightYear = ([regex] '(?<=AssemblyCopyright\("Copyright .*?)[0-9]{4}').Match($AssemblyInfo).Value
         $CurrentYear = Get-Date -Format yyyy
         if ($CurrentYear -ne $CopyrightYear) {
             $CopyrightYear = "$CopyrightYear-$CurrentYear"
         }
-        $CopyrightHeader = @"
+        $FileHeader = @"
 /*
-Copyright $CopyrightYear Red Gate Software Ltd (https://github.com/red-gate/MicroLibraries)
+This file is part of the $PackageId NuGet package, version $NuGetPackageVersion.
+
+Copyright $CopyrightYear Red Gate Software Limited (https://github.com/red-gate/MicroLibraries)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
 License and this notice. You may obtain a copy of the License at
@@ -146,35 +165,19 @@ any other copyright attribution.
         # Locate source files to be included in the package, and generate their corresponding .pp files.
         Get-ChildItem $ProjectDir -Filter *.cs | ForEach-Object {
             $InputPath = $_.FullName
-            $OriginalContents = [System.IO.File]::ReadAllText($InputPath, [System.Text.Encoding]::UTF8)
+            $Encoding = [System.Text.UTF8Encoding]::new($False, $True)
+            $OriginalContents = [System.IO.File]::ReadAllText($InputPath, $Encoding)
             $ModifiedContents = $OriginalContents.Replace('/***', '').Replace('***/', '')
             if ($OriginalContents -ne $ModifiedContents) {
                 Write-Host "  Including file $InputPath"
                 
-                $ModifiedContents = "$CopyrightHeader`r`n`r`n$ModifiedContents"
+                $ModifiedContents = "$FileHeader`r`n`r`n$ModifiedContents"
                 
                 $OutputPath = "$InputPath.pp"
                 Write-Host "    Rewriting to $OutputPath"
-                [System.IO.File]::WriteAllText($OutputPath, $ModifiedContents, [System.Text.Encoding]::UTF8)
+                [System.IO.File]::WriteAllText($OutputPath, $ModifiedContents, $Encoding)
             }
         }
-        
-        # Establish release notes and package version number from the RELEASENOTES.md file.
-        $Notes = Read-ReleaseNotes $ReleaseNotesPath -ThreePartVersion
-        $ReleaseNotes = $Notes.Content
-        $Version = $Notes.Version
-        Write-Host "Version from release notes: $Version"
-        
-        # Establish the summary and description from the README.md file.
-        $Description = [System.IO.File]::ReadAllText($ReadmePath, [System.Text.Encoding]::UTF8).Trim()
-        $Regex = [regex] '\.\s'
-        $Summary = if ($Description -match $Regex) { ($Description -split $Regex)[0] + '.' } else { $Description }
-
-        # Establish NuGet package version.
-        $BranchName = Get-BranchName
-        $IsDefaultBranch = $BranchName -eq 'master'
-        $NuGetPackageVersion = New-SemanticNuGetPackageVersion -Version $Version -BranchName $BranchName -IsDefaultBranch $IsDefaultBranch
-        Write-Host "NuGet package version = $NuGetPackageVersion"
 
         # Establish the output folder.
         $OutputDir = if ($PackageId -eq 'RedGate.ULibs.UlibsProjectTemplate.Sources' -or (Test-NugetPackage -Name $PackageId -Version $Version)) {
